@@ -56,8 +56,13 @@
 			for(var i = 0;i<nbPlanets; i++){
 				this.addPlanet();
 			}
+		}
 
 
+		rotatePlanets(){
+			for(var i = 0;i<this.planets.length;i++){
+	     		this.planets[i].rotate();
+	     	} 
 		}
 
 		
@@ -106,13 +111,40 @@
 	}
 
 
-
-
-	 // Initialisation of your objects / materials / light
 	 
-	
-	 var solarS = new SolarSystem(-10,0,Math.floor(Math.random()*10));
-	 var solarS2 = new SolarSystem(10,0,Math.floor(Math.random()*10));
+	class Galaxy{
+
+		listSolarS = []
+		constructor(){
+			var width = Math.floor(window.innerWidth/100); 
+			var height = Math.floor(window.innerHeight/100);
+
+			for(var x = -width/2;x<width/2;x++){
+				for(var y = -height/2;y<height/2;y++){
+					if(Math.random()>0.97){
+						this.listSolarS.push(new SolarSystem(x*2,y*2,Math.floor(Math.random()*10+1)));
+					}
+				}
+			 
+			}
+		}
+
+		checkDistance(position,distance){
+			//TODO: Vector2 check if there is a solarsystem on this case 
+		}
+
+		galaxyRotation(){
+			for(var i = 0;i<this.listSolarS.length;i++){
+	     		this.listSolarS[i].rotatePlanets();
+	     	} 
+		}
+
+	}
+
+	var galaxy = new Galaxy();
+
+
+	 
 
 	 // This is executed for each frames
 	 function render() {
@@ -120,14 +152,8 @@
 	     // Animation code goes here
 	     renderer.render( scene, camera );
 
-	     for(var i = 0;i<solarS.planets.length;i++){
-	     	solarS.planets[i].rotate();
-
-	     } 
-	     for(var i = 0;i<solarS2.planets.length;i++){
-	     	solarS2.planets[i].rotate();
-
-	     } 
+	     galaxy.galaxyRotation();
+	     
 	 }
 
 
