@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+	<meta charset="utf-8">
+	<title>My first three.js app</title>
+	<style>
+	 body { margin: 0; }
+	 canvas { width: 100%; height: 90% }
+	 #toolbar { color: white; position: absolute; }
+	 #toolbar a { color: lightgrey; }
+	 #toolbar a:hover { text-decoration: none; }
+	</style>
+    </head>
+    <body>
+	<p id="toolbar">
+	    <a href="https://threejs.org/docs/index.html#manual/en/introduction/Creating-a-scene">Documentation</a>
+	    <a href="mailto:adrien.peytavie@liris.cnrs.fr">adrien.peytavie@liris.cnrs.fr</a>
+	</p>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/84/three.js"></script>
+	<script>
+	 // Initialisation of the scene / camera / renderer
+	 var scene = new THREE.Scene();
+	 var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+	 var renderer = new THREE.WebGLRenderer();
+	 renderer.setSize( window.innerWidth, window.innerHeight );
+	 renderer.shadowMap.enabled = true;
+	 document.body.appendChild( renderer.domElement );
+	 camera.position.z = 25;
+	 
+	 class SolarSystem {
+	 	nbPlanets;
+		solarSystem;
+
+		sun;
+
+		planets = [];
+		addPlanet(){
+			var p = new Planet(Math.random()*(this.nbPlanets+3)+5,Math.random(),this.sun,this.solarSystem,Math.random()*(0.1 + 0.1)- 0.1);
+			this.planets.push(p);
+		}
+
+
+
+		constructor(x,y,nbPlanets) {
+			this.solarSystem = new THREE.Object3D();
+		    this.solarSystem.position.x = x;
+		    this.solarSystem.position.y = y;
+		    this.nbPlanets = nbPlanets;
+		 	scene.add(this.solarSystem);
+
+		 	var ball = new THREE.SphereGeometry(Math.random()+0.8 , 32, 32);
+			var sunMaterial = new THREE.MeshBasicMaterial( { color: 0xff4500 } );
+			this.sun = new THREE.Mesh(ball, sunMaterial);
+			this.solarSystem.add(this.sun);
+
+			for(var i = 0;i<nbPlanets; i++){
+				this.addPlanet();
+			}
+
+
+		}
+
+		
+
+	}
+
+	class Planet{
+		centerObj;
+		distance;
+		angle = 0;
+		rayon;
+		speed;
+		planet;
+
+		constructor(distance,rayon,centerObj,solarSystem,speed){
+			var ball = new THREE.SphereGeometry(rayon, 32, 32);
+			var planetMaterial = new THREE.MeshBasicMaterial();
+			planetMaterial.color=new THREE.Color( Math.random(), Math.random(), Math.random() );
+			this.planet = new THREE.Mesh(ball, planetMaterial);
+			this.distance = distance;
+			this.centerObj = centerObj;
+			this.speed = speed;
+			this.rayon = rayon;
+			solarSystem.add(this.planet);
+			this.rotate()
+		}
+
+		rotate () {
+			this.angle += this.speed;
+			if(this.centerObj != null){
+				this.planet.position.x = this.distance*Math.cos(this.angle) + this.centerObj.position.x;
+	    		this.planet.position.y = this.distance*Math.sin(this.angle) + this.centerObj.position.y;
+			}else{
+				this.planet.position.x = this.distance*Math.cos(this.angle);
+	    		this.planet.position.y = this.distance*Math.sin(this.angle);
+			}
+	 	}
+	 	getRandomColor() {
+		  var letters = '0123456789ABCDEF';
+		  var color = '0x';
+		  for (var i = 0; i < 6; i++) {
+		    color += letters[Math.floor(Math.random() * 16)];
+		  }
+		  return color;
+		}
+	}
+
+
+
+
+	 // Initialisation of your objects / materials / light
+	 
+	
+	 var solarS = new SolarSystem(-10,0,Math.floor(Math.random()*10));
+	 var solarS2 = new SolarSystem(10,0,Math.floor(Math.random()*10));
+
+	 // This is executed for each frames
+	 function render() {
+	     requestAnimationFrame( render );
+	     // Animation code goes here
+	     renderer.render( scene, camera );
+
+	     for(var i = 0;i<solarS.planets.length;i++){
+	     	solarS.planets[i].rotate();
+
+	     } 
+	     for(var i = 0;i<solarS2.planets.length;i++){
+	     	solarS2.planets[i].rotate();
+
+	     } 
+	 }
+
+
+
+
+
+	 render();
+	</script>
+    </body>
+</html>
