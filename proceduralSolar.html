@@ -25,12 +25,12 @@
 	 renderer.setSize( window.innerWidth, window.innerHeight );
 	 renderer.shadowMap.enabled = true;
 	 document.body.appendChild( renderer.domElement );
-	 camera.position.z = 25;
+	 camera.position.z = 60;
 	 
 	 class SolarSystem {
 	 	nbPlanets;
 		solarSystem;
-
+		positionSolarSys;
 		sun;
 
 		planets = [];
@@ -41,10 +41,11 @@
 
 
 
-		constructor(x,y,nbPlanets) {
+		constructor(positionSolarSys,nbPlanets) {
 			this.solarSystem = new THREE.Object3D();
-		    this.solarSystem.position.x = x;
-		    this.solarSystem.position.y = y;
+			this.solarSystem.position.x = positionSolarSys.x;
+			this.solarSystem.position.y = positionSolarSys.y;
+		    this.positionSolarSys = positionSolarSys;
 		    this.nbPlanets = nbPlanets;
 		 	scene.add(this.solarSystem);
 
@@ -116,21 +117,34 @@
 
 		listSolarS = []
 		constructor(){
-			var width = Math.floor(window.innerWidth/100); 
-			var height = Math.floor(window.innerHeight/100);
+			var width = Math.floor(window.innerWidth/10); 
+			var height = Math.floor(window.innerHeight/10);
 
 			for(var x = -width/2;x<width/2;x++){
 				for(var y = -height/2;y<height/2;y++){
-					if(Math.random()>0.97){
-						this.listSolarS.push(new SolarSystem(x*2,y*2,Math.floor(Math.random()*10+1)));
+					if(this.checkDistance(new THREE.Vector3(x*2,y*2,0))){
+						if(Math.random()>0.8){
+							this.listSolarS.push(new SolarSystem(new THREE.Vector3(x*2,y*2,0),Math.floor(Math.random()*10+1)));
+						}
+						
 					}
 				}
 			 
 			}
 		}
 
-		checkDistance(position,distance){
-			//TODO: Vector2 check if there is a solarsystem on this case 
+		checkDistance(positionNewSolarSys){
+			//TODO: Vector3 check if there is a solarsystem on this case 
+
+			for(var i=0;i<this.listSolarS.length;i++){
+				var distance = positionNewSolarSys.distanceTo(this.listSolarS[i].positionSolarSys);
+				
+				if (Math.abs(distance)<30){
+					return false;
+				}
+			}
+			return true;
+
 		}
 
 		galaxyRotation(){
