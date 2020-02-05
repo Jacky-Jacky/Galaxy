@@ -192,6 +192,13 @@
 		galaxy.generation();
 	}
 
+	function moveHandler(e){
+		if(e.button === 2){
+			console.log("Update");
+		gen();
+		}
+		
+	}
 
 
 	 // Initialisation of the scene / camera / renderer
@@ -221,6 +228,10 @@
 
 
 
+	document.onmousedown = moveHandler;
+	document.onmouseup = moveHandler;
+
+	var posCamera = controls.center;
 	 // This is executed for each frames
 	 function render() {
 	     requestAnimationFrame( render );
@@ -232,6 +243,7 @@
 	     controls.update();
 
 	     
+
 	 }
 
 
