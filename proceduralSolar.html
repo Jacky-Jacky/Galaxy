@@ -152,8 +152,8 @@
 
 		generation(){
 			console.log("generation");
-			var width = Math.floor(window.innerWidth/10); 
-			var height = Math.floor(window.innerHeight/10);
+			var width = Math.floor(window.innerWidth/10)*2; 
+			var height = Math.floor(window.innerHeight/10)*2;
 			for(var x = -width/2 + controls.center.x;x<width/2+controls.center.x;x=x+5){
 				for(var y = -height/2 + controls.center.y;y<height/2 + controls.center.y;y=y+5){
 					if(this.checkDistance(new THREE.Vector3(x,y,0))){
