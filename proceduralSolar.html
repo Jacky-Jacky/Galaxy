@@ -17,17 +17,11 @@
 	    <a href="mailto:adrien.peytavie@liris.cnrs.fr">adrien.peytavie@liris.cnrs.fr</a>
 	</p>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/84/three.js"></script>
+	<script src="OrbitControls.js"></script>
+	<script src='perlin.js'></script>
 	<script>
-	 // Initialisation of the scene / camera / renderer
-	 var scene = new THREE.Scene();
-	 var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
-	 var renderer = new THREE.WebGLRenderer();
-	 renderer.setSize( window.innerWidth, window.innerHeight );
-	 renderer.shadowMap.enabled = true;
-	 document.body.appendChild( renderer.domElement );
-	 camera.position.z = 60;
-	 
-	 class SolarSystem {
+	//Class qui compose la galaxy
+	class SolarSystem {
 	 	nbPlanets;
 		solarSystem;
 		positionSolarSys;
@@ -114,17 +108,27 @@
 
 	 
 	class Galaxy{
-
+		controls;
 		listSolarS = []
-		constructor(){
+		constructor(controls){
 			var width = Math.floor(window.innerWidth/10); 
 			var height = Math.floor(window.innerHeight/10);
 
-			for(var x = -width/2;x<width/2;x++){
-				for(var y = -height/2;y<height/2;y++){
-					if(this.checkDistance(new THREE.Vector3(x*2,y*2,0))){
-						if(Math.random()>0.8){
-							this.listSolarS.push(new SolarSystem(new THREE.Vector3(x*2,y*2,0),Math.floor(Math.random()*10+1)));
+			var seed = Math.floor(Math.random()*100000);
+			console.log(seed + " | " +noise.simplex2(1000/100,1000/100));
+			noise.seed(seed);
+			this.controls = controls;
+
+
+			//this.recurciveGeneration(-window.innerWidth/2,-window.innerHeight/2);
+			
+			
+			for(var x = -width/2;x<width/2;x=x+5){
+				for(var y = -height/2;y<height/2;y=y+5){
+					if(this.checkDistance(new THREE.Vector3(x,y,0))){
+
+						if(Math.abs(noise.simplex2(x/10,y/10))>0.7){
+							this.listSolarS.push(new SolarSystem(new THREE.Vector3(x,y,0),Math.floor(Math.random()*10+1)));
 						}
 						
 					}
@@ -153,12 +157,57 @@
 	     	} 
 		}
 
+
+		recurciveGeneration(x,y){
+			if(this.checkDistance(new THREE.Vector3(x,y,0))){
+				this.listSolarS.push(new SolarSystem(new THREE.Vector3(x*2,y*2,0),Math.floor(Math.random()*10+1)));
+			}
+			if(x>window.innerWidth){
+				if(y<window.innerHeight){
+					this.recurciveGeneration(window.innerWidth,y*2+Math.random()*30);
+				}
+			}else{
+				if(y<window.innerHeight){
+					this.recurciveGeneration(x*2+Math.random()*30,y*2+Math.random()*30);
+				}else{
+					this.recurciveGeneration(x*2+Math.random()*30,window.innerHeight);
+				}
+			}
+			
+		}
+
+
 	}
 
-	var galaxy = new Galaxy();
 
 
+
+	 // Initialisation of the scene / camera / renderer
+	 var scene = new THREE.Scene();
+	 var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+	 var renderer = new THREE.WebGLRenderer();
+	 renderer.setSize( window.innerWidth, window.innerHeight );
+	 renderer.shadowMap.enabled = true;
+	 document.body.appendChild( renderer.domElement );
+	 camera.position.z = 60;
 	 
+	 
+
+	//Gestion des mouvements de la camera
+	var controls = new THREE.OrbitControls (camera, renderer.domElement);
+
+	controls.noKeys = true;
+	controls.noRotate = true;
+	controls.update();
+
+	//initialisation de la galaxy
+	var galaxy = new Galaxy(controls);
+
+
+	//TODO: Génération procédural
+	console.log(controls.center); //Affiche le centre de la camera
+
+
 
 	 // This is executed for each frames
 	 function render() {
@@ -167,6 +216,9 @@
 	     renderer.render( scene, camera );
 
 	     galaxy.galaxyRotation();
+	     //Update de la Camera
+	     controls.update();
+
 	     
 	 }
 
@@ -175,6 +227,12 @@
 
 
 	 render();
+
+
+
+
+
+	 
 	</script>
     </body>
 </html>
