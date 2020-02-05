@@ -33,20 +33,24 @@
 		sun;
 
 		planets = [];
-		addPlanet(){
-			var p = new Planet(Math.random()*(this.nbPlanets+3)+5,Math.random(),this.sun,this.solarSystem,Math.random()*(0.1 + 0.1)- 0.1);
-			this.planets.push(p);
-		}
+		galaxy;
+		
 
 
 
-		constructor(positionSolarSys,nbPlanets) {
+		constructor(positionSolarSys,nbPlanets,galaxy) {
 			this.id = Math.floor(noise.simplex2(positionSolarSys.x/1000,positionSolarSys.y/1000)*1000000);
-			this.solarSystem = new THREE.Object3D();
+			var ball = new THREE.SphereGeometry(nbPlanets+7, 32, 32);
+			var SSMaterial = new THREE.MeshBasicMaterial({ color: 0xff4500, transparent: true, opacity: 0 });
+
+			this.solarSystem = new THREE.Mesh(ball, SSMaterial);
+			//this.solarSystem = new THREE.Object3D();
 			this.solarSystem.position.x = positionSolarSys.x;
 			this.solarSystem.position.y = positionSolarSys.y;
 		    this.positionSolarSys = positionSolarSys;
 		    this.nbPlanets = nbPlanets;
+		    this.galaxy = galaxy;
+
 		 	scene.add(this.solarSystem);
 
 		 	var ball = new THREE.SphereGeometry(Math.random()+0.8 , 32, 32);
@@ -59,11 +63,17 @@
 			}
 		}
 
+		addPlanet(){
+			var p = new Planet(Math.random()*(this.nbPlanets+3)+5,Math.random(),this.sun,this.solarSystem,Math.random()*(0.1 + 0.1)- 0.1);
+			this.planets.push(p);
+			this.galaxy.targetList.push(p.planet);
+		}
 
 		rotatePlanets(){
 			for(var i = 0;i<this.planets.length;i++){
 	     		this.planets[i].rotate();
 	     	} 
+
 		}
 
 		
@@ -115,7 +125,9 @@
 	 
 	class Galaxy{
 		controls;
-		listSolarS = []
+		listSolarS = [];
+		targetList = [];
+		targetListSolarS = [];
 		constructor(controls){
 			var seed = Math.floor(Math.random()*100000);
 			console.log(seed + " | " +noise.simplex2(1000/100,1000/100));
@@ -161,7 +173,9 @@
 						if(Math.abs(noise.simplex2(x/10,y/10))>0.7){
 							
 							if(this.verifIdIsNoOnList(Math.floor(noise.simplex2(x/1000,y/1000)*1000000))){
-								this.listSolarS.push(new SolarSystem(new THREE.Vector3(x,y,0),Math.floor(Math.random()*10+1)));
+								var s = new SolarSystem(new THREE.Vector3(x,y,0),Math.floor(Math.random()*10+1),this);
+								this.listSolarS.push(s);
+								this.targetListSolarS.push(s.solarSystem);
 							}
 							
 						}
@@ -201,6 +215,30 @@
 	}
 
 
+	
+	
+
+	function mouseClickHandler(e){
+		mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+		mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+		
+		raycaster.setFromCamera( mouse, camera ); 
+		var intersects = raycaster.intersectObjects( galaxy.targetListSolarS );
+		/*for ( var i = 0; i < intersects.length; i++ ) { 
+			
+		    intersects[ i ].object.material.color.set( 0xff0000 ); 
+		  }*/
+		if(intersects.length>0){
+
+			camera.position.x = intersects[0].object.position.x;
+			camera.position.y = intersects[0].object.position.y;
+			camera.lookAt(intersects[0].object.position);
+			console.log(camera.position);
+		}
+
+	}
+
+
 	 // Initialisation of the scene / camera / renderer
 	 var scene = new THREE.Scene();
 	 var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
@@ -210,7 +248,8 @@
 	 document.body.appendChild( renderer.domElement );
 	 camera.position.z = 60;
 	 
-	 
+	 var mouse = new THREE.Vector2();
+	 var raycaster = new THREE.Raycaster();
 
 	//Gestion des mouvements de la camera
 	var controls = new THREE.OrbitControls (camera, renderer.domElement);
@@ -222,17 +261,14 @@
 
 	//initialisation de la galaxy
 	var galaxy = new Galaxy(controls);
+
 	document.getElementById("gen").onclick = gen;
-
-	//TODO: Génération procédural
-	console.log(controls.center); //Affiche le centre de la camera
-
-
 
 	document.onmousedown = moveHandler;
 	document.onmouseup = moveHandler;
+	document.onclick = mouseClickHandler;
 
-	var posCamera = controls.center;
+
 	 // This is executed for each frames
 	 function render() {
 	     requestAnimationFrame( render );
@@ -242,8 +278,6 @@
 	     galaxy.galaxyRotation();
 	     //Update de la Camera
 	     controls.update();
-
-	     
 
 	 }
 
