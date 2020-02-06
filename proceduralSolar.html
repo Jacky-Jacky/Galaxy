@@ -64,7 +64,7 @@
 		}
 
 		addPlanet(){
-			var p = new Planet(Math.random()*(this.nbPlanets+3)+5,Math.random(),this.sun,this.solarSystem,Math.random()*(0.1 + 0.1)- 0.1);
+			var p = new Planet(Math.random()*(this.nbPlanets+3)+5,Math.random(),this.sun,this.solarSystem,Math.random()*(0.05 + 0.05)- 0.05);
 			this.planets.push(p);
 			this.galaxy.targetList.push(p.planet);
 		}
@@ -209,14 +209,11 @@
 	function moveHandler(e){
 		if(e.button === 2){
 			console.log("Update");
-		gen();
+			gen();
 		}
 		
 	}
 
-
-	
-	
 
 	function mouseClickHandler(e){
 		mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
@@ -224,16 +221,15 @@
 		
 		raycaster.setFromCamera( mouse, camera ); 
 		var intersects = raycaster.intersectObjects( galaxy.targetListSolarS );
-		/*for ( var i = 0; i < intersects.length; i++ ) { 
-			
-		    intersects[ i ].object.material.color.set( 0xff0000 ); 
-		  }*/
+		//Vision sur un systeme
 		if(intersects.length>0){
-
 			camera.position.x = intersects[0].object.position.x;
 			camera.position.y = intersects[0].object.position.y;
-			camera.lookAt(intersects[0].object.position);
-			console.log(camera.position);
+			camera.position.z = 15;
+			
+			controls.target = new THREE.Vector3(intersects[0].object.position.x,intersects[0].object.position.y,0);
+			gen();
+
 		}
 
 	}
